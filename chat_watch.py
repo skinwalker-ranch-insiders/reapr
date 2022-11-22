@@ -3,7 +3,7 @@ import logging
 
 logging.basicConfig(level=logging.INFO)
 
-chat = pytchat.create(video_id="BdBetaZc82g")
+chat = pytchat.create(video_id="YT_LINK_ID")
 while chat.is_alive():
     for c in chat.get().sync_items():
         logging.info(f"{c.datetime} [{c.author.name}]- {c.message}")
