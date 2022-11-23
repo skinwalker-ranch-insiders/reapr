@@ -23,15 +23,23 @@ def read_chat():
             logging.info(f"{c.datetime} [{c.author.name}]- {c.message}")
             # See tag send it somewhere. TXT for now, DB is the dream
             if c.message.startswith(('#EVENT:')):
+                # Ideally this would get logged to a database
                 with open('events.txt', 'a') as f:
                     f.write(f"\nEVENT: {c.datetime} [{c.author.name}]- {c.message}")
                 print(f"EVENT: {c.datetime} [{c.author.name}] {c.message}")
             elif c.message.startswith(('#REQUEST:')):
+                # Ideally this would get logged to a database
                 with open('requests.txt', 'a') as f:
                     f.write(f"\nREQUEST:: {c.datetime} [{c.author.name}]- {c.message}")
                 print(f"REQUEST: {c.datetime} [{c.author.name}] {c.message}")
             elif c.message.startswith(('#THOUGHT:')):
+                # Ideally this would get logged to a database
                 with open('thoughts.txt', 'a') as f:
+                    f.write(f"\nTHOUGHT: {c.datetime} [{c.author.name}]- {c.message}")
+                print(f"THOUGHT: {c.datetime} [{c.author.name}] {c.message}")
+            elif c.message.startswith(('#ALERT:')):
+                # Ideally this would trigger an email or message to someone.
+                with open('alerts.txt', 'a') as f:
                     f.write(f"\nTHOUGHT: {c.datetime} [{c.author.name}]- {c.message}")
                 print(f"THOUGHT: {c.datetime} [{c.author.name}] {c.message}")
             
