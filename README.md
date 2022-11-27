@@ -3,35 +3,42 @@
 A BIG THANKS to https://pypi.org/project/pytchat/ for making this happen.
 
 johns67567 contributed the ability to send events to MySQL.
-DATABASE SETUP:
-CREATE DATABASE reapr_database;
-CREATE TABLE yt_events (id MEDIUMINT NOT NULL AUTO_INCREMENT, YT_Tag VARCHAR(30),
-       YT_DateTime DATETIME, YT_User VARCHAR(60), YT_Msg VARCHAR(200), PRIMARY KEY (id));
 
+DATABASE SETUP:
+```
+mysql> CREATE DATABASE reapr_database;
+mysql> CREATE TABLE yt_events (id MEDIUMINT NOT NULL AUTO_INCREMENT, YT_Tag VARCHAR(30),
+       YT_DateTime DATETIME, YT_User VARCHAR(60), YT_Msg VARCHAR(200), PRIMARY KEY (id));
+```
 Give your user access to this database with permission to write.
 Save database hostname, database name, username and password for later
 
 Dockerfile included:
+```
 $ screen
 $ cd chat-watch
 $ mkdir /usr/src/reapr
 $ cp chat-watch/* /usr/src/reapr
 $ cd /usr/src/reapr
 $ vi /usr/src/reapr/settings.py
-{
+```
+
 Set the following variables:
+```
 db_server='ServerIP'
 db_user='username'
 db_passwd='password'
 db_name='reaper_database'
-}
+```
+Build andn run your REAPR container:
+```
 $ sudo docker build -t reapr
 $ sudo docker run -it -name reapr --rm --volume $(pwd):/usr/src/reapr -net=host reapr:latest sh
 /usr/src/reapr # python3 ./reapr.py [YouTube StreamID REQUIRED]
-
+```
 If the script has timeout issues staying connected to chat, you may need REAPR's Cloak
 rcloak.sh
----------
+```
 #!/bin/sh
 while true
 do
@@ -41,10 +48,14 @@ do
         /usr/local/bin/python3 ./reapr.py $1
    fi
 done
-#-------------------------------------------
+```
+Change permissions and run reapr's cloak:
+```
 /usr/src/reapr # chmod 755 ./rcloak.sh
 /usr/src/reapr # ./rcloak.sh
-
+```
 You should be up and running. Send a test event #EVENT: REAPR Test in YT Chat and 
-USE reaper_database;
-SELECT * FROM yt_events;
+```
+mysql> USE reaper_database;
+mysql> SELECT * FROM yt_events;
+```
