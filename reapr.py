@@ -4,7 +4,11 @@
 #      keywords are used such as #EVENT: #REQUEST: #THOUGHT:
 # Created as a PoC to an idea presented by Erik Bard allowing
 #      for quick, easy collection of data based on observations
-#      watching the Skinwalker Insiders stream.
+#      watching the Skinwalker Insiders Live Stream.
+# Contributing Insiders:
+#      Robert Davies <robert.kris.davies@gmail.com>, Insider Discord
+#      @johns67567 - Insider Discord
+#      @We Have Fun - Kris - Insider Discord
 
 import sys
 import time
@@ -53,27 +57,25 @@ def read_chat(YouTube_ID):
             YT_DateTime=c.datetime
             YT_User=c.author.name
             YT_Msg=c.message
-            # See tag send it somewhere. TXT for now, DB is the dream
+            # See tag, label it ship it off
             if c.message.startswith(('#EVENT:')):
-                # Ideally this would get logged to a database
                 YT_Tag='EVENT'
                 SWR_YT_MSG(YT_Tag, YT_DateTime, YT_User, YT_Msg)
                 print(f"EVENT: {c.datetime} [{c.author.name}] {c.message}")
             elif c.message.startswith(('#REQUEST:')):
-                # Ideally this would get logged to a database
                 YT_Tag='REQUEST'
                 SWR_YT_MSG(YT_Tag, YT_DateTime, YT_User, YT_Msg)
                 print(f"REQUEST: {c.datetime} [{c.author.name}] {c.message}")
             elif c.message.startswith(('#THOUGHT:')):
-                # Ideally this would get logged to a database
                 YT_Tag='THOUGHT'
                 SWR_YT_MSG(YT_Tag, YT_DateTime, YT_User, YT_Msg)
                 print(f"THOUGHT: {c.datetime} [{c.author.name}] {c.message}")
             elif c.message.startswith(('#ALERT:')):
-                # Ideally this would trigger an email or message to someone.
                 YT_Tag='ALERT'
                 SWR_YT_MSG(YT_Tag, YT_DateTime, YT_User, YT_Msg)
                 print(f"ALERT: {c.datetime} [{c.author.name}] {c.message}")
+                # I would like to add some way to email this off as an ALERT!
+            # There has to be some way to indicate chat is not alive anymore and reset
             elif not chat.is_alive:
                 print("NOT is_alive caught.")
                 main(YouTube_ID)
