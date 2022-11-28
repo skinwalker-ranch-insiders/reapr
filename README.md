@@ -58,10 +58,20 @@ done
 Change permissions and run reapr's cloak:
 ```
 /usr/src/reapr # chmod 755 ./rcloak.sh
-/usr/src/reapr # ./rcloak.sh
+/usr/src/reapr # ./rcloak.sh [YouTube StreamID REQUIRED]
 ```
-You should be up and running. Send a test event #EVENT: REAPR Test in YT Chat and 
+Once it is running you will see the follwing:
+```
+Starting REAPR - Reporting Events, Anomalous Phenomena and Requests
+```
+You should be up and running. Send a test event #EVENT: REAPR Test in YT Chat
+of the Live Stream and it should pop on screen within a few moments.
+
+To make sure it is reaching your database, connect to your database server:
 ```
 mysql> USE reaper_database;
 mysql> SELECT * FROM yt_events;
 ```
+You should be able to see the #EVENT: you sent.
+
+Next install reapr-web: https://github.com/skinwalker-ranch-insiders/reapr-web
