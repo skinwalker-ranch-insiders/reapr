@@ -66,12 +66,19 @@ Starting REAPR - Reporting Events, Anomalous Phenomena and Requests
 ```
 You should be up and running. Send a test event #EVENT: REAPR Test in YT Chat
 of the Live Stream and it should pop on screen within a few moments.
-
+```
+EVENT: 2022-11-27 22:27:37 [Robert Davies] #EVENT: Example event.
+```
 To make sure it is reaching your database, connect to your database server:
 ```
 mysql> USE reaper_database;
 mysql> SELECT * FROM yt_events;
 ```
 You should be able to see the #EVENT: you sent.
-
+```
++-----+---------+---------------------+-------------------+-------------------------------------------------------------------------------+
+| id  | YT_Tag  | YT_DateTime         | YT_User           | YT_Msg                                                                        |
++-----+---------+---------------------+-------------------+-------------------------------------------------------------------------------+
+|   1 | EVENT   | 2022-11-27 22:27:37 | Robert Davies     | #EVENT: Example event.                                                        |
+```
 Next install reapr-web: https://github.com/skinwalker-ranch-insiders/reapr-web
