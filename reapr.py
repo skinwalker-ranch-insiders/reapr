@@ -7,7 +7,7 @@
 #      watching the Skinwalker Insiders Live Stream.
 # Contributing Insiders:
 #      Robert Davies <robert.kris.davies@gmail.com>, Insider Discord
-#      @johns67567 - Insider Discord
+#      @johns67467 - Insider Discord
 #      @We Have Fun - Kris - Insider Discord
 
 import sys
@@ -22,7 +22,7 @@ log = logging.getLogger()
 YouTube_ID = " ".join(sys.argv[1:])
 
 def SWR_YT_MSG(YT_Tag, YT_DateTime, YT_User, YT_Msg):
-    # Contributed by johns67567
+    # Contributed by johns67467
     # depends on what DB is being used.
     import pyodbc
     from settings import db_server, db_user, db_passwd, db_name

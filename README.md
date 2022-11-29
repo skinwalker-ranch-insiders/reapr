@@ -2,7 +2,7 @@
 
 A BIG THANKS to https://pypi.org/project/pytchat/ for making this happen.
 
-johns67567 contributed the ability to send events to MySQL.
+johns67467 contributed the ability to send events to MySQL.
 
 DATABASE SETUP:
 ```
@@ -39,31 +39,29 @@ db_name='reaper_database'
 Build andn run your REAPR container:
 ```
 $ sudo docker build -t reapr
-$ sudo docker run -it --name reapr --rm --volume $(pwd):/usr/src/reapr --net=host reapr:latest sh ./rcloak.sh [YouTube StreamID REQUIRED]
+$ sudo docker run -it -name reapr --rm --volume $(pwd):/usr/src/reapr -net=host reapr:latest sh
+/usr/src/reapr # python3 ./reapr.py [YouTube StreamID REQUIRED]
 ```
-Once it is running you will see the follwing:
+If the script has timeout issues staying connected to chat, you may need REAPR's Cloak
+rcloak.sh
 ```
-Starting REAPR - Reporting Events, Anomalous Phenomena and Requests
+#!/bin/sh
+while true
+do
+   pgrep -f 'python3 ./reapr'>/dev/null
+   if [[ $? -ne 0 ]] ; then
+        echo "Restarting REAPR:     $(date)" >> ./reapr_restarts.txt
+        /usr/local/bin/python3 ./reapr.py $1
+   fi
+done
 ```
-You should be up and running. Send a test event #EVENT: REAPR Test in YT Chat
-of the Live Stream and it should pop on screen within a few moments.
+Change permissions and run reapr's cloak:
 ```
-EVENT: 2022-11-27 22:27:37 [Robert Davies] #EVENT: Example event.
+/usr/src/reapr # chmod 755 ./rcloak.sh
+/usr/src/reapr # ./rcloak.sh
 ```
-To make sure it is reaching your database, connect to your database server:
+You should be up and running. Send a test event #EVENT: REAPR Test in YT Chat and 
 ```
 mysql> USE reaper_database;
 mysql> SELECT * FROM yt_events;
 ```
-You should be able to see the #EVENT: you sent.
-```
-+-----+---------+---------------------+-------------------+-------------------------------------------------------------------------------+
-| id  | YT_Tag  | YT_DateTime         | YT_User           | YT_Msg                                                                        |
-+-----+---------+---------------------+-------------------+-------------------------------------------------------------------------------+
-|   1 | EVENT   | 2022-11-27 22:27:37 | Robert Davies     | #EVENT: Example event.                                                        |
-```
-After validating that REAPR is receiving data and sending it to the database you can turn the container into a daemon:
-```
-sudo docker run -it --name reapr -d --rm --volume $(pwd):/usr/src/reapr --net=host reapr:latest sh ./rcloak.sh
-```
-Next install reapr-web: https://github.com/skinwalker-ranch-insiders/reapr-web
