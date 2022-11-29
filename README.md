@@ -39,26 +39,7 @@ db_name='reaper_database'
 Build andn run your REAPR container:
 ```
 $ sudo docker build -t reapr
-$ sudo docker run -it -name reapr --rm --volume $(pwd):/usr/src/reapr -net=host reapr:latest sh
-/usr/src/reapr # python3 ./reapr.py [YouTube StreamID REQUIRED]
-```
-If the script has timeout issues staying connected to chat, you may need REAPR's Cloak
-rcloak.sh
-```
-#!/bin/sh
-while true
-do
-   pgrep -f 'python3 ./reapr'>/dev/null
-   if [[ $? -ne 0 ]] ; then
-        echo "Restarting REAPR:     $(date)" >> ./reapr_restarts.txt
-        /usr/local/bin/python3 ./reapr.py $1
-   fi
-done
-```
-Change permissions and run reapr's cloak:
-```
-/usr/src/reapr # chmod 755 ./rcloak.sh
-/usr/src/reapr # ./rcloak.sh [YouTube StreamID REQUIRED]
+$ sudo docker run -it --name reapr --rm --volume $(pwd):/usr/src/reapr --net=host reapr:latest sh ./rcloak.sh [YouTube StreamID REQUIRED]
 ```
 Once it is running you will see the follwing:
 ```
@@ -80,5 +61,9 @@ You should be able to see the #EVENT: you sent.
 | id  | YT_Tag  | YT_DateTime         | YT_User           | YT_Msg                                                                        |
 +-----+---------+---------------------+-------------------+-------------------------------------------------------------------------------+
 |   1 | EVENT   | 2022-11-27 22:27:37 | Robert Davies     | #EVENT: Example event.                                                        |
+```
+After validating that REAPR is receiving data and sending it to the database you can turn the container into a daemon:
+```
+sudo docker run -it --name reapr -d --rm --volume $(pwd):/usr/src/reapr --net=host reapr:latest sh ./rcloak.sh
 ```
 Next install reapr-web: https://github.com/skinwalker-ranch-insiders/reapr-web
