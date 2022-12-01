@@ -1,3 +1,5 @@
+s_login='email@address.com for insiders website'
+s_password='password'
 db_server='DB_SERVER_IP'
 db_user='reapr_user'
 db_passwd='your-reapr-password'

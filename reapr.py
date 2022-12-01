@@ -14,12 +14,14 @@ import sys
 import time
 import pytchat
 import logging
+import get_streamID as get_streamID
 
 print("Starting REAPR - Reporting Events, Anomalous Phenomena and Requests")
 
 logging.basicConfig(level=logging.ERROR)
 log = logging.getLogger()
-YouTube_ID = " ".join(sys.argv[1:])
+#YouTube_ID = " ".join(sys.argv[1:])
+YouTube_ID = get_streamID()
 
 def SWR_YT_MSG(YT_Tag, YT_DateTime, YT_User, YT_Msg):
     # Contributed by johns67467
