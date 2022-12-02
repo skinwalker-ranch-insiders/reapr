@@ -14,14 +14,44 @@ import sys
 import time
 import pytchat
 import logging
-import get_streamID as get_streamID
+import get_streamID
+import mechanize
+import re
+from bs4 import BeautifulSoup
+from settings import s_login, s_password
+import urllib.request as urllib2
+import http.cookiejar as cookielib
 
 print("Starting REAPR - Reporting Events, Anomalous Phenomena and Requests")
 
 logging.basicConfig(level=logging.ERROR)
 log = logging.getLogger()
 #YouTube_ID = " ".join(sys.argv[1:])
-YouTube_ID = get_streamID()
+YouTube_ID = get_streamID.get_streamID()
+
+def get_streamID():
+    user_agent = [('User-agent','Mozilla/5.0 (X11;U;Linux 2.4.2.-2 i586; en-us;m18) Gecko/200010131 Netscape6/6.01')]
+
+    cj = cookielib.CookieJar()
+    br = mechanize.Browser()
+    br.set_cookiejar(cj)
+    br.set_handle_robots(False)
+    br.addheaders=user_agent
+    br.open("https://skinwalker-ranch.com/ranch-webcam-livestream/")
+
+    br.select_form(nr=0)
+    br.form['log'] = s_login
+    br.form['pwd'] = s_password
+    br.submit()
+
+    soup = BeautifulSoup(br.response().read(), features="html5lib")
+    for item in soup.find_all('iframe'):
+        if 'embed' in item.get('src'):
+            stream_url = item.get('src')
+
+    stream_ID = stream_url.strip("https://www.youtube.com/live_chat?v=")
+    print(stream_ID[:11])
+    return stream_ID[:11]
 
 def SWR_YT_MSG(YT_Tag, YT_DateTime, YT_User, YT_Msg):
     # Contributed by johns67467
@@ -51,7 +81,7 @@ def map_tags_dict(test_case: str = None):
     tag_types[tag_type]()
 
 def read_chat(YouTube_ID):
-    chat = pytchat.create(video_id=YouTube_ID)
+    chat = pytchat.create(video_id="https://www.youtube.com/watch?v=" + YouTube_ID)
     while chat.is_alive():
         for c in chat.get().sync_items():
             # Lets read all chat if we set logging to INFO
@@ -91,5 +121,5 @@ def main(YouTube_ID):
         time.sleep(1)
         read_chat(YouTube_ID)
         pass
-
+YouTube_ID=get_streamID()[:11]
 main(YouTube_ID)

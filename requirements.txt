@@ -1,3 +1,5 @@
 pytchat
 pymysql
 pyodbc
+mechanize
+bs4
