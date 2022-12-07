@@ -14,7 +14,6 @@ import sys
 import time
 import pytchat
 import logging
-import get_streamID
 import mechanize
 import re
 from bs4 import BeautifulSoup
@@ -26,8 +25,6 @@ print("Starting REAPR - Reporting Events, Anomalous Phenomena and Requests")
 
 logging.basicConfig(level=logging.ERROR)
 log = logging.getLogger()
-#YouTube_ID = " ".join(sys.argv[1:])
-YouTube_ID = get_streamID.get_streamID()
 
 def get_streamID():
     user_agent = [('User-agent','Mozilla/5.0 (X11;U;Linux 2.4.2.-2 i586; en-us;m18) Gecko/200010131 Netscape6/6.01')]
@@ -50,7 +47,6 @@ def get_streamID():
             stream_url = item.get('src')
 
     stream_ID = stream_url.strip("https://www.youtube.com/live_chat?v=")
-    print(stream_ID[:11])
     return stream_ID[:11]
 
 def SWR_YT_MSG(YT_Tag, YT_DateTime, YT_User, YT_Msg):
@@ -121,5 +117,5 @@ def main(YouTube_ID):
         time.sleep(1)
         read_chat(YouTube_ID)
         pass
-YouTube_ID=get_streamID()[:11]
+YouTube_ID=get_streamID()
 main(YouTube_ID)
