@@ -14,6 +14,7 @@ import sys
 import time
 import pytchat
 import logging
+import get_streamID
 import mechanize
 import re
 from bs4 import BeautifulSoup
@@ -49,6 +50,51 @@ def get_streamID():
     stream_ID = stream_url.strip("https://www.youtube.com/live_chat?v=")
     return stream_ID[:11]
 
+def get_data():
+    ###### SQL CONNECTION ######
+    from settings import db_server, db_user, db_passwd, db_name
+    import mysql.connector
+    connection = mysql.connector.connect(
+                                host=db_server,
+                                database=db_name,
+                                user=db_user,
+                                password=db_passwd)
+
+    cursor = connection.cursor()
+    query = ("SELECT * FROM yt_events ORDER BY id DESC")
+    cursor.execute(query)
+    data = cursor.fetchall()
+    connection.close()
+    return data
+
+def UPDATE_DB_SS(id):
+    import pyodbc
+    from settings import db_server, db_user, db_passwd, db_name
+    import pymysql
+    conn = pymysql.connect(host=db_server,user=db_user,passwd=db_passwd,db=db_name)
+    cursor = conn.cursor()
+    SWR_SS_Entry = "UPDATE yt_events SET IN_SS = %s where id = %s"
+    cursor.execute(SWR_SS_Entry,('Y', id))
+    conn.commit()
+
+def sync_ss():
+    import pandas as pd
+    import datetime
+    now = datetime.datetime.now()
+    month = now.strftime("%B")
+    year = now.strftime("%Y")
+    SHEET_TUPLE = (month, "%20", year)
+    SHEET_NAME = ''.join(SHEET_TUPLE)
+
+    from settings import SHEET_ID
+    url = f'https://docs.google.com/spreadsheets/d/{SHEET_ID}/gviz/tq?tqx=out:csv&sheet={SHEET_NAME}'
+    df = pd.read_csv(url)
+    for row in get_data():
+        REAPR_ID=int(row[0])
+        for i in df.iloc[:, 1]:
+            if str(REAPR_ID) in str(i):
+                UPDATE_DB_SS(int(REAPR_ID))
+
 def SWR_YT_MSG(YT_Tag, YT_DateTime, YT_User, YT_Msg):
     # Contributed by johns67467
     # depends on what DB is being used.
@@ -64,6 +110,7 @@ def SWR_YT_MSG(YT_Tag, YT_DateTime, YT_User, YT_Msg):
 
     cursor.execute(SWR_YT_Entry,(YT_Tag, YT_DateTime, YT_User, YT_Msg))
     conn.commit()
+    sync_ss()
 
 def map_tags_dict(test_case: str = None):
     tag_types = {
@@ -98,6 +145,10 @@ def read_chat(YouTube_ID):
                 YT_Tag='THOUGHT'
                 SWR_YT_MSG(YT_Tag, YT_DateTime, YT_User, YT_Msg)
                 print(f"THOUGHT: {c.datetime} [{c.author.name}] {c.message}")
+            elif c.message.startswith(('#FEEDBACK:')):
+                YT_Tag='FEEDBACK'
+                SWR_YT_MSG(YT_Tag, YT_DateTime, YT_User, YT_Msg)
+                print(f"FEEDBACK: {c.datetime} [{c.author.name}] {c.message}")
             elif c.message.startswith(('#ALERT:')):
                 YT_Tag='ALERT'
                 SWR_YT_MSG(YT_Tag, YT_DateTime, YT_User, YT_Msg)
@@ -112,7 +163,8 @@ def main(YouTube_ID):
     try:
         read_chat(YouTube_ID)
         sys.exit(1)
-    except:
+    except Exception as e:
+        print(e)
         print("*** TIMEOUT ***")
         time.sleep(1)
         read_chat(YouTube_ID)

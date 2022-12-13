@@ -3,3 +3,5 @@ pymysql
 pyodbc
 mechanize
 bs4
+pandas
+mysql-connector-python
