@@ -1,4 +1,4 @@
-# REAPR - Reporting Events, Anomalous Phenomena and Requests
+# REAPR - Reporting Events, Anomalous Phenomena et Requests
 #
 # Read chat from YouTube Live Stream and save a copy when
 #      keywords are used such as #EVENT: #REQUEST: #THOUGHT:
