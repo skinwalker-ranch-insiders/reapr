@@ -127,14 +127,14 @@ def read_chat(YouTube_ID):
                     print(f"ALERT: {c.datetime} [{c.author.name}] {c.message}")
             elif not chat.is_alive:
                 print("NOT is_alive caught.")
-                main(youtube_id)
+                main()
 
 def main():
-    print("Starting REAPR - Reporting Events, Anomalous Phenomena and Requests")
-    YouTube_ID=get_streamID()
-
     logging.basicConfig(level=logging.ERROR)
     log = logging.getLogger()
+    
+    print("Starting REAPR - Reporting Events, Anomalous Phenomena and Requests")
+    YouTube_ID=get_streamID()
 
     try:
         read_chat(YouTube_ID)
