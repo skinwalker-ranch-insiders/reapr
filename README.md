@@ -2,7 +2,11 @@
 
 A BIG THANKS to https://pypi.org/project/pytchat/ for making this happen.
 
-johns67467 contributed the ability to send events to MySQL.
+@johns67467 contributed the ability to send events to MySQL.
+@Kris - We Have Fun : Insiders Discord : Code review, library and coding suggestions
+@John Neiberger : Insiders Discord : Code review, library and coding suggestions
+@SWR Insiders : Whose patience and testing helped make this happen so fast
+THANK YOU ALL!
 
 DATABASE SETUP:
 ```
@@ -42,6 +46,10 @@ sheet_id='Google Sheet ID'
 Build andn run your REAPR container:
 ```
 $ sudo docker build -t reapr
+$ sudo docker run -it -name reapr -d --rm --volume $(pwd):/usr/src/reapr -net=host reapr:latest sh ./rcloak.sh
+```
+If you have errors or problems, rerun the last command without the -d switch to see the output and debug information.
+```
 $ sudo docker run -it -name reapr --rm --volume $(pwd):/usr/src/reapr -net=host reapr:latest sh ./rcloak.sh
 ```
 You should be up and running. Send a test event '#EVENT: REAPR Test' in YT Chat and on your MySQL DB:
