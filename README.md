@@ -42,25 +42,7 @@ sheet_id='Google Sheet ID'
 Build andn run your REAPR container:
 ```
 $ sudo docker build -t reapr
-$ sudo docker run -it -name reapr --rm --volume $(pwd):/usr/src/reapr -net=host reapr:latest python3 ./rcloak.sh
-```
-If the script has timeout issues staying connected to chat, you may need REAPR's Cloak
-rcloak.sh
-```
-#!/bin/sh
-while true
-do
-   pgrep -f 'python3 ./reapr'>/dev/null
-   if [[ $? -ne 0 ]] ; then
-        echo "Restarting REAPR:     $(date)" >> ./reapr_restarts.txt
-        /usr/local/bin/python3 ./reapr.py
-   fi
-done
-```
-Change permissions and run reapr's cloak:
-```
-/usr/src/reapr # chmod 755 ./rcloak.sh
-/usr/src/reapr # ./rcloak.sh
+$ sudo docker run -it -name reapr --rm --volume $(pwd):/usr/src/reapr -net=host reapr:latest sh ./rcloak.sh
 ```
 You should be up and running. Send a test event '#EVENT: REAPR Test' in YT Chat and on your MySQL DB:
 ```
