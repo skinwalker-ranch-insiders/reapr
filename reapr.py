@@ -126,11 +126,12 @@ def read_chat(YouTube_ID):
             yt_user=c.author.name
             yt_msg=c.message
             # See tag, label it ship it off
-            tag = re.search(r'^#\w+:', c.message.upper())
+            tag_list = ['EVENT', 'REQUEST', 'THOUGHT', 'FEEDBACK']
+            tag = re.findall(r"(?=("+'|'.join(tag_list)+r"))", c.message.upper())
 
             if tag:
-                yt_tag = tag[1:-1]
-                if yt_tag in ['EVENT', 'REQUEST', 'THOUGHT', 'FEEDBACK']:
+                yt_tag = tag[0] 
+                if yt_tag in tag_list:
                     swr_yt_msg(yt_tag, yt_datetime, yt_user, yt_msg)
                     print(f"ALERT: {c.datetime} [{c.author.name}] {c.message}")
             elif not chat.is_alive:
