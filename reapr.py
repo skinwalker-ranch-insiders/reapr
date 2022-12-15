@@ -9,26 +9,22 @@
 #      Robert Davies <robert.kris.davies@gmail.com>, Insider Discord
 #      @johns67467 - Insider Discord
 #      @We Have Fun - Kris - Insider Discord
+#      @John Neiberger - Insider Discord
 
 import sys
 import time
 import pytchat
 import logging
-import get_streamID
 import mechanize
-import re
-from bs4 import BeautifulSoup
-from settings import s_login, s_password
-import urllib.request as urllib2
+import datetime
+import mysql.connector
 import http.cookiejar as cookielib
-
-print("Starting REAPR - Reporting Events, Anomalous Phenomena and Requests")
-
-logging.basicConfig(level=logging.ERROR)
-log = logging.getLogger()
+import pandas as pd
+from bs4 import BeautifulSoup
+from settings import s_login, s_password, db_server, db_user, db_passwd, db_name, SHEET_ID
 
 def get_streamID():
-    user_agent = [('User-agent','Mozilla/5.0 (X11;U;Linux 2.4.2.-2 i586; en-us;m18) Gecko/200010131 Netscape6/6.01')]
+    user_agent = [('User-agent','REAPR (X11;U;Linux 2.4.2.-2 i586; en-us;m18) Skinwalker/20221201-1 reapr.py')]
 
     cj = cookielib.CookieJar()
     br = mechanize.Browser()
@@ -52,8 +48,6 @@ def get_streamID():
 
 def get_data():
     ###### SQL CONNECTION ######
-    from settings import db_server, db_user, db_passwd, db_name
-    import mysql.connector
     connection = mysql.connector.connect(
                                 host=db_server,
                                 database=db_name,
@@ -68,25 +62,23 @@ def get_data():
     return data
 
 def UPDATE_DB_SS(id):
-    import pyodbc
-    from settings import db_server, db_user, db_passwd, db_name
-    import pymysql
-    conn = pymysql.connect(host=db_server,user=db_user,passwd=db_passwd,db=db_name)
-    cursor = conn.cursor()
-    SWR_SS_Entry = "UPDATE yt_events SET IN_SS = %s where id = %s"
-    cursor.execute(SWR_SS_Entry,('Y', id))
-    conn.commit()
+    connection = mysql.connector.connect(
+                          host=db_server,
+                          user=db_user,
+                          passwd=db_passwd,
+                          db=db_name)
+    cursor = connection.cursor()
+    query = "UPDATE yt_events SET IN_SS = %s where id = %s"
+    cursor.execute(query,('Y', id))
+    connection.commit()
 
 def sync_ss():
-    import pandas as pd
-    import datetime
     now = datetime.datetime.now()
     month = now.strftime("%B")
     year = now.strftime("%Y")
     SHEET_TUPLE = (month, "%20", year)
     SHEET_NAME = ''.join(SHEET_TUPLE)
 
-    from settings import SHEET_ID
     url = f'https://docs.google.com/spreadsheets/d/{SHEET_ID}/gviz/tq?tqx=out:csv&sheet={SHEET_NAME}'
     df = pd.read_csv(url)
     for row in get_data():
@@ -98,18 +90,12 @@ def sync_ss():
 def SWR_YT_MSG(YT_Tag, YT_DateTime, YT_User, YT_Msg):
     # Contributed by johns67467
     # depends on what DB is being used.
-    import pyodbc
-    from settings import db_server, db_user, db_passwd, db_name
+    connection = mysql.connector.connect(host=db_server,user=db_user,passwd=db_passwd,db=db_name)
+    cursor = connection.cursor()
+    query = "INSERT INTO yt_events (YT_Tag, YT_DateTime, YT_User, YT_msg) VALUES (%s, %s, %s, %s)"
 
-    # Used for MySQL commands and connections
-    import pymysql
-
-    conn = pymysql.connect(host=db_server,user=db_user,passwd=db_passwd,db=db_name)
-    cursor = conn.cursor()
-    SWR_YT_Entry = "INSERT INTO yt_events (YT_Tag, YT_DateTime, YT_User, YT_msg) VALUES (%s, %s, %s, %s)"
-
-    cursor.execute(SWR_YT_Entry,(YT_Tag, YT_DateTime, YT_User, YT_Msg))
-    conn.commit()
+    cursor.execute(query,(YT_Tag, YT_DateTime, YT_User, YT_Msg))
+    connection.commit()
     sync_ss()
 
 def map_tags_dict(test_case: str = None):
@@ -133,23 +119,23 @@ def read_chat(YouTube_ID):
             YT_User=c.author.name
             YT_Msg=c.message
             # See tag, label it ship it off
-            if c.message.startswith(('#EVENT:')):
+            if c.message.upper().startswith(('#EVENT:')):
                 YT_Tag='EVENT'
                 SWR_YT_MSG(YT_Tag, YT_DateTime, YT_User, YT_Msg)
                 print(f"EVENT: {c.datetime} [{c.author.name}] {c.message}")
-            elif c.message.startswith(('#REQUEST:')):
+            elif c.message.upper().startswith(('#REQUEST:')):
                 YT_Tag='REQUEST'
                 SWR_YT_MSG(YT_Tag, YT_DateTime, YT_User, YT_Msg)
                 print(f"REQUEST: {c.datetime} [{c.author.name}] {c.message}")
-            elif c.message.startswith(('#THOUGHT:')):
+            elif c.message.upper().startswith(('#THOUGHT:')):
                 YT_Tag='THOUGHT'
                 SWR_YT_MSG(YT_Tag, YT_DateTime, YT_User, YT_Msg)
                 print(f"THOUGHT: {c.datetime} [{c.author.name}] {c.message}")
-            elif c.message.startswith(('#FEEDBACK:')):
+            elif c.message.upper().startswith(('#FEEDBACK:')):
                 YT_Tag='FEEDBACK'
                 SWR_YT_MSG(YT_Tag, YT_DateTime, YT_User, YT_Msg)
                 print(f"FEEDBACK: {c.datetime} [{c.author.name}] {c.message}")
-            elif c.message.startswith(('#ALERT:')):
+            elif c.message.upper().startswith(('#ALERT:')):
                 YT_Tag='ALERT'
                 SWR_YT_MSG(YT_Tag, YT_DateTime, YT_User, YT_Msg)
                 print(f"ALERT: {c.datetime} [{c.author.name}] {c.message}")
@@ -160,6 +146,12 @@ def read_chat(YouTube_ID):
                 main(YouTube_ID)
 
 def main(YouTube_ID):
+    print("Starting REAPR - Reporting Events, Anomalous Phenomena and Requests")
+    YouTube_ID=get_streamID()
+
+    logging.basicConfig(level=logging.ERROR)
+    log = logging.getLogger()
+
     try:
         read_chat(YouTube_ID)
         sys.exit(1)
@@ -169,5 +161,6 @@ def main(YouTube_ID):
         time.sleep(1)
         read_chat(YouTube_ID)
         pass
-YouTube_ID=get_streamID()
-main(YouTube_ID)
+
+if __name__ == "__main__":
+    main()
