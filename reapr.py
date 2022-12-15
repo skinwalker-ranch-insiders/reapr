@@ -10,7 +10,7 @@
 #      @johns67467 - Insider Discord
 #      @We Have Fun - Kris - Insider Discord
 #      @John Neiberger - Insider Discord
-
+import re
 import sys
 import time
 import pytchat
@@ -90,7 +90,7 @@ def sync_ss():
             if str(reapr_id) in str(i):
                 update_db_ss(int(reapr_id))
 
-def swr_yt_msg(YT_Tag, YT_DateTime, YT_User, YT_Msg):
+def swr_yt_msg(yt_tag, yt_datetime, yt_user, yt_msg):
     # Contributed by johns67467
     # depends on what DB is being used.
     connection = mysql.connector.connect(
@@ -99,9 +99,9 @@ def swr_yt_msg(YT_Tag, YT_DateTime, YT_User, YT_Msg):
                                         passwd=db_passwd,
                                         db=db_name)
     cursor = connection.cursor()
-    query = "INSERT INTO yt_events (YT_Tag, YT_DateTime, YT_User, YT_msg) VALUES (%s, %s, %s, %s)"
+    query = "INSERT INTO yt_events (yt_tag, yt_datetime, yt_user, yt_msg) VALUES (%s, %s, %s, %s)"
 
-    cursor.execute(query,(YT_Tag, YT_DateTime, YT_User, YT_Msg))
+    cursor.execute(query,(yt_tag, yt_datetime, yt_user, yt_msg))
     connection.commit()
     sync_ss()
 
@@ -122,35 +122,20 @@ def read_chat(YouTube_ID):
         for c in chat.get().sync_items():
             # Lets read all chat if we set logging to INFO
             logging.info(f"{c.datetime} [{c.author.name}]- {c.message}")
-            YT_DateTime=c.datetime
-            YT_User=c.author.name
-            YT_Msg=c.message
+            yt_datetime=c.datetime
+            yt_user=c.author.name
+            yt_msg=c.message
             # See tag, label it ship it off
-            if c.message.upper().startswith(('#EVENT:')):
-                YT_Tag='EVENT'
-                swr_yt_msg(YT_Tag, YT_DateTime, YT_User, YT_Msg)
-                print(f"EVENT: {c.datetime} [{c.author.name}] {c.message}")
-            elif c.message.upper().startswith(('#REQUEST:')):
-                YT_Tag='REQUEST'
-                swr_yt_msg(YT_Tag, YT_DateTime, YT_User, YT_Msg)
-                print(f"REQUEST: {c.datetime} [{c.author.name}] {c.message}")
-            elif c.message.upper().startswith(('#THOUGHT:')):
-                YT_Tag='THOUGHT'
-                swr_yt_msg(YT_Tag, YT_DateTime, YT_User, YT_Msg)
-                print(f"THOUGHT: {c.datetime} [{c.author.name}] {c.message}")
-            elif c.message.upper().startswith(('#FEEDBACK:')):
-                YT_Tag='FEEDBACK'
-                swr_yt_msg(YT_Tag, YT_DateTime, YT_User, YT_Msg)
-                print(f"FEEDBACK: {c.datetime} [{c.author.name}] {c.message}")
-            elif c.message.upper().startswith(('#ALERT:')):
-                YT_Tag='ALERT'
-                swr_yt_msg(YT_Tag, YT_DateTime, YT_User, YT_Msg)
-                print(f"ALERT: {c.datetime} [{c.author.name}] {c.message}")
-                # I would like to add some way to email this off as an ALERT!
-            # There has to be some way to indicate chat is not alive anymore and reset
+            tag = re.search(r'^#\w+:', c.message.upper())
+
+            if tag:
+                yt_tag = tag[1:-1]
+                if yt_tag in ['EVENT', 'REQUEST', 'THOUGHT', 'FEEDBACK']:
+                    swr_yt_msg(yt_tag, yt_datetime, yt_user, yt_msg)
+                    print(f"ALERT: {c.datetime} [{c.author.name}] {c.message}")
             elif not chat.is_alive:
                 print("NOT is_alive caught.")
-                main(YouTube_ID)
+                main(youtube_id)
 
 def main():
     print("Starting REAPR - Reporting Events, Anomalous Phenomena and Requests")
