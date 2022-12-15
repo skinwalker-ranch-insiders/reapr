@@ -15,11 +15,11 @@ import sys
 import time
 import pytchat
 import logging
-import mechanize
 import datetime
+import mechanize
+import pandas as pd
 import mysql.connector
 import http.cookiejar as cookielib
-import pandas as pd
 from bs4 import BeautifulSoup
 from settings import s_login, s_password, db_server, db_user, db_passwd, db_name, sheet_id
 
@@ -74,6 +74,7 @@ def update_db_ss(id):
     query = "UPDATE yt_events SET IN_SS = %s where id = %s"
     cursor.execute(query,('Y', id))
     connection.commit()
+    connection.close()
 
 def sync_ss():
     now = datetime.datetime.now()
@@ -103,18 +104,8 @@ def swr_yt_msg(yt_tag, yt_datetime, yt_user, yt_msg):
 
     cursor.execute(query,(yt_tag, yt_datetime, yt_user, yt_msg))
     connection.commit()
+    connection.close()
     sync_ss()
-
-def map_tags_dict(test_case: str = None):
-    tag_types = {
-    '#EVENT:': event_function,
-    '#THOUGHT:': thought_function,
-    '#REQUEST:': request_function,
-    '#ALERT:': alert_function,
-    }
-
-    # Call the mapping function based on test_case as key
-    tag_types[tag_type]()
 
 def read_chat(YouTube_ID):
     chat = pytchat.create(video_id="https://www.youtube.com/watch?v=" + YouTube_ID)
