@@ -21,10 +21,13 @@ import mysql.connector
 import http.cookiejar as cookielib
 import pandas as pd
 from bs4 import BeautifulSoup
-from settings import s_login, s_password, db_server, db_user, db_passwd, db_name, SHEET_ID
+from settings import s_login, s_password, db_server, db_user, db_passwd, db_name, sheet_id
 
 def get_streamID():
-    user_agent = [('User-agent','REAPR (X11;U;Linux 2.4.2.-2 i586; en-us;m18) Skinwalker/20221201-1 reapr.py')]
+    user_agent = [
+        ('User-agent',
+        'REAPR (X11;U;Linux MyKernelMyBusiness; Insider-Powered) Skinwalker/20221214-1 reapr.py')
+        ]
 
     cj = cookielib.CookieJar()
     br = mechanize.Browser()
@@ -49,10 +52,10 @@ def get_streamID():
 def get_data():
     ###### SQL CONNECTION ######
     connection = mysql.connector.connect(
-                                host=db_server,
-                                database=db_name,
-                                user=db_user,
-                                password=db_passwd)
+                                        host=db_server,
+                                        database=db_name,
+                                        user=db_user,
+                                        password=db_passwd)
 
     cursor = connection.cursor()
     query = ("SELECT * FROM yt_events ORDER BY id DESC")
@@ -61,12 +64,12 @@ def get_data():
     connection.close()
     return data
 
-def UPDATE_DB_SS(id):
+def update_db_ss(id):
     connection = mysql.connector.connect(
-                          host=db_server,
-                          user=db_user,
-                          passwd=db_passwd,
-                          db=db_name)
+                                        host=db_server,
+                                        user=db_user,
+                                        passwd=db_passwd,
+                                        db=db_name)
     cursor = connection.cursor()
     query = "UPDATE yt_events SET IN_SS = %s where id = %s"
     cursor.execute(query,('Y', id))
@@ -76,21 +79,25 @@ def sync_ss():
     now = datetime.datetime.now()
     month = now.strftime("%B")
     year = now.strftime("%Y")
-    SHEET_TUPLE = (month, "%20", year)
-    SHEET_NAME = ''.join(SHEET_TUPLE)
+    sheet_tuple = (month, "%20", year)
+    sheet_name = ''.join(sheet_tuple)
 
-    url = f'https://docs.google.com/spreadsheets/d/{SHEET_ID}/gviz/tq?tqx=out:csv&sheet={SHEET_NAME}'
+    url = f'https://docs.google.com/spreadsheets/d/{sheet_id}/gviz/tq?tqx=out:csv&sheet={sheet_name}'
     df = pd.read_csv(url)
     for row in get_data():
-        REAPR_ID=int(row[0])
+        reapr_id=int(row[0])
         for i in df.iloc[:, 1]:
-            if str(REAPR_ID) in str(i):
-                UPDATE_DB_SS(int(REAPR_ID))
+            if str(reapr_id) in str(i):
+                update_db_ss(int(reapr_id))
 
-def SWR_YT_MSG(YT_Tag, YT_DateTime, YT_User, YT_Msg):
+def swr_yt_msg(YT_Tag, YT_DateTime, YT_User, YT_Msg):
     # Contributed by johns67467
     # depends on what DB is being used.
-    connection = mysql.connector.connect(host=db_server,user=db_user,passwd=db_passwd,db=db_name)
+    connection = mysql.connector.connect(
+                                        host=db_server,
+                                        user=db_user,
+                                        passwd=db_passwd,
+                                        db=db_name)
     cursor = connection.cursor()
     query = "INSERT INTO yt_events (YT_Tag, YT_DateTime, YT_User, YT_msg) VALUES (%s, %s, %s, %s)"
 
@@ -121,23 +128,23 @@ def read_chat(YouTube_ID):
             # See tag, label it ship it off
             if c.message.upper().startswith(('#EVENT:')):
                 YT_Tag='EVENT'
-                SWR_YT_MSG(YT_Tag, YT_DateTime, YT_User, YT_Msg)
+                swr_yt_msg(YT_Tag, YT_DateTime, YT_User, YT_Msg)
                 print(f"EVENT: {c.datetime} [{c.author.name}] {c.message}")
             elif c.message.upper().startswith(('#REQUEST:')):
                 YT_Tag='REQUEST'
-                SWR_YT_MSG(YT_Tag, YT_DateTime, YT_User, YT_Msg)
+                swr_yt_msg(YT_Tag, YT_DateTime, YT_User, YT_Msg)
                 print(f"REQUEST: {c.datetime} [{c.author.name}] {c.message}")
             elif c.message.upper().startswith(('#THOUGHT:')):
                 YT_Tag='THOUGHT'
-                SWR_YT_MSG(YT_Tag, YT_DateTime, YT_User, YT_Msg)
+                swr_yt_msg(YT_Tag, YT_DateTime, YT_User, YT_Msg)
                 print(f"THOUGHT: {c.datetime} [{c.author.name}] {c.message}")
             elif c.message.upper().startswith(('#FEEDBACK:')):
                 YT_Tag='FEEDBACK'
-                SWR_YT_MSG(YT_Tag, YT_DateTime, YT_User, YT_Msg)
+                swr_yt_msg(YT_Tag, YT_DateTime, YT_User, YT_Msg)
                 print(f"FEEDBACK: {c.datetime} [{c.author.name}] {c.message}")
             elif c.message.upper().startswith(('#ALERT:')):
                 YT_Tag='ALERT'
-                SWR_YT_MSG(YT_Tag, YT_DateTime, YT_User, YT_Msg)
+                swr_yt_msg(YT_Tag, YT_DateTime, YT_User, YT_Msg)
                 print(f"ALERT: {c.datetime} [{c.author.name}] {c.message}")
                 # I would like to add some way to email this off as an ALERT!
             # There has to be some way to indicate chat is not alive anymore and reset
