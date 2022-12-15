@@ -133,7 +133,7 @@ def main():
     logging.basicConfig(level=logging.ERROR)
     log = logging.getLogger()
     
-    print("Starting REAPR - Reporting Events, Anomalous Phenomena and Requests")
+    print("Starting REAPR - Reporting Events, Anomalous Phenomena et Requests")
     YouTube_ID=get_streamID()
 
     try:
