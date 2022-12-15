@@ -2,10 +2,10 @@
 
 A BIG THANKS to https://pypi.org/project/pytchat/ for making this happen.
 
-@johns67467 contributed the ability to send events to MySQL.
-@Kris - We Have Fun : Insiders Discord : Code review, library and coding suggestions
-@John Neiberger : Insiders Discord : Code review, library and coding suggestions
-@SWR Insiders : Whose patience and testing helped make this happen so fast
+@johns67467 contributed the ability to send events to MySQL.<br>
+@Kris - We Have Fun : Insiders Discord : Code review, library and coding suggestions<br>
+@John Neiberger : Insiders Discord : Code review, library and coding suggestions<br>
+@SWR Insiders : Whose patience and testing helped make this happen so fast<br>
 THANK YOU ALL!
 
 DATABASE SETUP:
