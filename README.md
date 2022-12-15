@@ -31,16 +31,18 @@ $ vi /usr/src/reapr/settings.py
 
 Set the following variables:
 ```
-db_server='ServerIP'
-db_user='username'
-db_passwd='password'
-db_name='reaper_database'
+s_login='email@address.com for insiders website'
+s_password='password'
+db_server='DB_SERVER_IP'
+db_user='reapr_user'
+db_passwd='your-reapr-password'
+db_name='reapr_db'
+sheet_id='Google Sheet ID'
 ```
 Build andn run your REAPR container:
 ```
 $ sudo docker build -t reapr
-$ sudo docker run -it -name reapr --rm --volume $(pwd):/usr/src/reapr -net=host reapr:latest sh
-/usr/src/reapr # python3 ./reapr.py [YouTube StreamID REQUIRED]
+$ sudo docker run -it -name reapr --rm --volume $(pwd):/usr/src/reapr -net=host reapr:latest python3 ./rcloak.sh
 ```
 If the script has timeout issues staying connected to chat, you may need REAPR's Cloak
 rcloak.sh
@@ -51,7 +53,7 @@ do
    pgrep -f 'python3 ./reapr'>/dev/null
    if [[ $? -ne 0 ]] ; then
         echo "Restarting REAPR:     $(date)" >> ./reapr_restarts.txt
-        /usr/local/bin/python3 ./reapr.py $1
+        /usr/local/bin/python3 ./reapr.py
    fi
 done
 ```
@@ -60,8 +62,9 @@ Change permissions and run reapr's cloak:
 /usr/src/reapr # chmod 755 ./rcloak.sh
 /usr/src/reapr # ./rcloak.sh
 ```
-You should be up and running. Send a test event #EVENT: REAPR Test in YT Chat and 
+You should be up and running. Send a test event '#EVENT: REAPR Test' in YT Chat and on your MySQL DB:
 ```
 mysql> USE reaper_database;
 mysql> SELECT * FROM yt_events;
 ```
+Now that data collection is in progress, it is time to setup REAPR-web from https://github.com/skinwalker-ranch-insiders/reapr-web.
