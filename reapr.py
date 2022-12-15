@@ -118,7 +118,7 @@ def read_chat(YouTube_ID):
             yt_msg=c.message
             # See tag, label it ship it off
             tag_list = ['EVENT', 'REQUEST', 'THOUGHT', 'FEEDBACK']
-            tag = re.findall(r"(?=("+'|'.join(tag_list)+r"))", c.message.upper())
+            tag = re.findall(r"^#(?=("+'|'.join(tag_list)+r"):)+", c.message.upper())
 
             if tag:
                 yt_tag = tag[0] 
