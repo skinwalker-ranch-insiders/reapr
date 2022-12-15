@@ -145,7 +145,7 @@ def read_chat(YouTube_ID):
                 print("NOT is_alive caught.")
                 main(YouTube_ID)
 
-def main(YouTube_ID):
+def main():
     print("Starting REAPR - Reporting Events, Anomalous Phenomena and Requests")
     YouTube_ID=get_streamID()
 
