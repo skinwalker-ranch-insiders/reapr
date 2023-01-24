@@ -58,8 +58,10 @@ def get_streamID():
     for item in soup.find_all("iframe"):
         if "embed" in item.get("src"):
             stream_url = item.get("src")
-
-    stream_ID = stream_url.strip("https://www.youtube.com/live_chat?v=")
+    """ 2023/1/23 -- strips true colors show up. I could have used ("htps:/wyoubecmlivha?=") """
+    """ This makes it buggy if the streamID contains ANY of those letters. """
+    #stream_ID = stream_url.strip("https://www.youtube.com/live_chat?v=")
+    stream_ID = stream_url[36:]
     return stream_ID[:11]
 
 
