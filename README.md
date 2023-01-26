@@ -17,7 +17,7 @@ Connect to your new database server and create the database:
 ```
 mysql> CREATE DATABASE reapr_database;
 mysql> CREATE TABLE yt_events (id MEDIUMINT NOT NULL AUTO_INCREMENT, YT_Tag VARCHAR(30),
-       YT_DateTime DATETIME, YT_User VARCHAR(60), YT_Msg VARCHAR(200), PRIMARY KEY (id));
+       YT_DateTime DATETIME, YT_User VARCHAR(60), YT_Msg VARCHAR(200), IN_SS VARCHAR(1), PRIMARY KEY (id));
 ```
 Give your user access to this database with permission to write.
 Save database hostname, database name, username and password for later
