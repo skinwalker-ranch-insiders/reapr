@@ -54,7 +54,7 @@ $ sudo docker run -it -name reapr --rm --volume $(pwd):/usr/src/reapr -net=host 
 ```
 You should be up and running. Send a test event '#EVENT: REAPR Test' in YT Chat and on your MySQL DB:
 ```
-mysql> USE reaper_database;
+mysql> USE reaper_db;
 mysql> SELECT * FROM yt_events;
 ```
 Now that data collection is in progress, it is time to setup REAPR-web from https://github.com/skinwalker-ranch-insiders/reapr-web.
