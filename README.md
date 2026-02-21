@@ -1,60 +1,155 @@
-# REAPR
+# REAPR - Real-time Event Annotation & Processing Recorder
 
-A BIG THANKS to https://pypi.org/project/pytchat/ for making this happen.
+A Python-based real-time data collection system that monitors YouTube Live chat streams, filters messages by custom keywords (tags), stores events in a MySQL database, and synchronizes with Google Sheets for downstream analysis.
 
-@johns67467 contributed the ability to send events to MySQL.<br>
-@Kris - We Have Fun : Insiders Discord : Code review, library and coding suggestions<br>
-@John Neiberger : Insiders Discord : Code review, library and coding suggestions<br>
-@SWR Insiders : Whose patience and testing helped make this happen so fast<br>
-THANK YOU ALL!
+## Overview
 
-DATABASE SETUP:
-```
-$ docker pull mysql
-$ docker run --name reapr-mysql --net=host -e MYSQL_ROOT_PASSWORD=your-sql-password -e MYSQL_USER=reapr_user -e MYSQL_PASSWORD=your-reapr-password -d mysql:latest
-```
-Connect to your new database server and create the database:
-```
-mysql> CREATE DATABASE reapr_database;
-mysql> CREATE TABLE yt_events (id MEDIUMINT NOT NULL AUTO_INCREMENT, YT_Tag VARCHAR(30),
-       YT_DateTime DATETIME, YT_User VARCHAR(60), YT_Msg VARCHAR(200), IN_SS VARCHAR(1), PRIMARY KEY (id));
-```
-Give your user access to this database with permission to write.
-Save database hostname, database name, username and password for later
+REAPR was designed to capture and organize viewer-submitted events, requests, thoughts, and feedback from live stream chat in real-time. The system automatically detects tagged messages, persists them to a database, and maintains synchronization with cloud spreadsheets for collaborative review.
 
-Dockerfile included:
+## Features
+
+- **Real-time YouTube Chat Monitoring** - Captures live chat messages using the pytchat library
+- **Keyword-based Filtering** - Detects and processes messages tagged with #EVENT, #REQUEST, #THOUGHT, or #FEEDBACK
+- **MySQL Database Integration** - Persistent storage with automatic synchronization
+- **Google Sheets Sync** - Bi-directional sync with Google Sheets for team collaboration
+- **Automated Stream Detection** - Web scraping to dynamically discover active YouTube stream IDs
+- **Containerized Deployment** - Docker-based deployment for easy scaling
+- **Auto-restart Capability** - Built-in process monitoring and automatic recovery
+
+## Technology Stack
+
+| Component | Technology |
+|-----------|------------|
+| Language | Python 3.9+ |
+| Database | MySQL |
+| Web Scraping | BeautifulSoup, Mechanize |
+| Data Processing | Pandas |
+| YouTube Integration | pytchat |
+| Containerization | Docker |
+| Cloud Integration | Google Sheets API |
+
+## Architecture
+
 ```
-$ screen
-$ git clone git@github.com:skinwalker-ranch-insiders/reapr.git
-$ cd reapr
-$ mkdir /usr/src/reapr
-$ cp reapr/* /usr/src/reapr
-$ cd /usr/src/reapr
-$ vi /usr/src/reapr/settings.py
+YouTube Live Stream → REAPR (Chat Monitor) → MySQL Database
+                                              ↓
+                              Google Sheets (Sync)
 ```
 
-Set the following variables:
+## Prerequisites
+
+- Python 3.9 or higher
+- MySQL 5.7+
+- Docker (optional, for containerized deployment)
+- Google Sheets API credentials (for spreadsheet sync)
+
+## Installation
+
+### Local Development
+
+1. Clone the repository:
+```bash
+git clone https://github.com/skinwalker-ranch-insiders/reapr.git
+cd reapr
 ```
-s_login='email@address.com for insiders website'
-s_password='password'
-db_server='DB_SERVER_IP'
-db_user='reapr_user'
-db_passwd='your-reapr-password'
-db_name='reapr_db'
-sheet_id='Google Sheet ID'
+
+2. Create a virtual environment:
+```bash
+python3 -m venv venv
+source venv/bin/activate
 ```
-Build andn run your REAPR container:
+
+3. Install dependencies:
+```bash
+pip install -r requirements.txt
 ```
-$ sudo docker build -t reapr
-$ sudo docker run -it -name reapr -d --rm --volume $(pwd):/usr/src/reapr -net=host reapr:latest sh ./rcloak.sh
+
+4. Configure settings:
+Edit `settings.py` with your configuration:
+```python
+s_login = 'your_insiders_email'
+s_password = 'your_password'
+db_server = 'localhost'
+db_user = 'reapr_user'
+db_passwd = 'your_password'
+db_name = 'reapr_database'
+sheet_id = 'your_google_sheet_id'
 ```
-If you have errors or problems, rerun the last command without the -d switch to see the output and debug information.
+
+5. Database Setup:
+```sql
+CREATE DATABASE reapr_database;
+CREATE TABLE yt_events (
+    id MEDIUMINT NOT NULL AUTO_INCREMENT,
+    YT_Tag VARCHAR(30),
+    YT_DateTime DATETIME,
+    YT_User VARCHAR(60),
+    YT_Msg VARCHAR(200),
+    IN_SS VARCHAR(1),
+    PRIMARY KEY (id)
+);
 ```
-$ sudo docker run -it -name reapr --rm --volume $(pwd):/usr/src/reapr -net=host reapr:latest sh ./rcloak.sh
+
+### Docker Deployment
+
+```bash
+docker build -t reapr .
+docker run -d --name reapr --network host -v $(pwd):/usr/src/reapr reapr:latest sh ./rcloak.sh
 ```
-You should be up and running. Send a test event '#EVENT: REAPR Test' in YT Chat and on your MySQL DB:
+
+## Usage
+
+Run the application:
+```bash
+python3 reapr.py
 ```
-mysql> USE reaper_db;
-mysql> SELECT * FROM yt_events;
+
+The application will:
+1. Authenticate with the Skinwalker Ranch website
+2. Retrieve the current live stream ID
+3. Begin monitoring YouTube chat in real-time
+4. Process and store tagged messages automatically
+
+## Project Structure
+
 ```
-Now that data collection is in progress, it is time to setup REAPR-web from https://github.com/skinwalker-ranch-insiders/reapr-web.
+REAPR/
+├── reapr.py          # Main application logic
+├── settings.py       # Configuration variables
+├── requirements.txt  # Python dependencies
+├── Dockerfile        # Docker container definition
+├── rcloak.sh        # Process monitoring script
+└── README.md        # Project documentation
+```
+
+## Key Implementation Details
+
+### Real-time Chat Processing
+- Uses async chat capture via pytchat to handle high-volume live streams
+- Regex-based tag detection for flexible message classification
+
+### Database Operations
+- MySQL connector for reliable data persistence
+- Automatic synchronization with Google Sheets after each new event
+- Tracks synchronization status to prevent duplicate entries
+
+### Stream Discovery
+- Automated YouTube stream ID retrieval via web scraping
+- Handles authentication and session management
+
+## Contributing
+
+Contributions are welcome! This project was developed with contributions from:
+- Robert Davies (@skinwalker-ranch-insiders)
+- @johns67467 (MySQL integration)
+- @Kris - We Have Fun (code review & suggestions)
+- @John Neiberger (code review & suggestions)
+
+## License
+
+MIT License
+
+## Acknowledgments
+
+- [pytchat](https://pypi.org/project/pytchat/) for YouTube live chat integration
+- Skinwalker Ranch Insiders community for testing and feedback
